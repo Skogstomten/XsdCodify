@@ -32,5 +32,22 @@ namespace XsdCodify.Lib.Test.Generation
             //Then
             Assert.Equal("[MyAttribute(argName=\"myValue\")]", result);
         }
+
+        [Fact]
+        public void CanCreateAttributeWithMultipleStringValueArguments()
+        {
+            //Given
+            AttributeFactory target = new AttributeFactory();
+            
+            //When
+            string result = target.Create(
+                "MyAttribute",
+                new AttributeNamedStringConstantArgument("arg1", "value1"),
+                new AttributeNamedStringConstantArgument("arg2", "value2")
+            );
+            
+            //Then
+            Assert.Equal("[MyAttribute(arg1=\"value1\", arg2=\"value2\")]", result);
+        }
     }
 }

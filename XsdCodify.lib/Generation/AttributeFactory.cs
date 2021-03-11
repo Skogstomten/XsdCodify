@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using XsdCodify.Lib.Generation.Arguments;
 
 namespace XsdCodify.Lib.Generation
@@ -9,7 +10,12 @@ namespace XsdCodify.Lib.Generation
         {
             if (attributeName == null) throw new ArgumentNullException(nameof(attributeName));
 
-            return $"[{attributeName}]";
+            if (attributeArguments == null || !attributeArguments.Any()) {
+                return $"[{attributeName}]";
+            } else {
+                string arguments = string.Join(", ", attributeArguments.Select(a => a.Formatted));
+                return $"[{attributeName}({arguments})]";
+            }
         }
     }
 }
