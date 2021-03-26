@@ -1,0 +1,7 @@
+public class MyClass
+{
+    public string Prop1 { get; set; }
+
+    [MyAttribute(arg1="value1")]
+    public MyType Prop2 { get; set; }
+}

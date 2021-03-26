@@ -17,4 +17,9 @@
     <ProjectReference Include="..\XsdCodify.Lib\XsdCodify.Lib.csproj" />
   </ItemGroup>
 
+  <Target Name="CopyCustomContent" AfterTargets="AfterBuild">
+    <Copy SourceFiles=".\Generation\TemplateFiles\ClassBuilderTest\CanMakeClassWithProperties.txt"
+      DestinationFolder="$(OutDir)" />
+  </Target>
+
 </Project>
