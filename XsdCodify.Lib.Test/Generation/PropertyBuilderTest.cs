@@ -3,7 +3,7 @@ using System;
 using Xunit;
 
 using XsdCodify.Lib.Generation;
-using XsdCodify.Lib.Generation.Arguments;
+using XsdCodify.Lib.Generation.BuilderContexts;
 
 namespace XsdCodify.Lib.Test
 {
@@ -16,11 +16,10 @@ namespace XsdCodify.Lib.Test
             PropertyBuilder target = new PropertyBuilder();
 
             //When
-            string result = target.Property("string", "MyProperty")
-                .Build();
+            IPropertyContext result = target.Create("string", "MyProperty").Build();
             
             //Then
-            Assert.Equal("public string MyProperty { get; set; }", result);
+            Assert.Equal("public string MyProperty { get; set; }", result.ToString());
         }
 
         [Fact]
@@ -28,18 +27,18 @@ namespace XsdCodify.Lib.Test
         {
             //Given
             PropertyBuilder target = new PropertyBuilder();
-            AttributeFactory attributeFactory = new AttributeFactory();
+            AttributeBuilder attributeBuilder = new AttributeBuilder();
             
             //When
-            string result = target.Property("int", "MyValue")
-                .Attribute(attributeFactory.Create("MyAttribute"))
+            IPropertyContext result = target.Create("int", "MyValue")
+                .Attribute(attributeBuilder.Create("MyAttribute").Build())
                 .Build();
             
             //Then
             string expected = 
                 $"[MyAttribute]" + Environment.NewLine +
                 $"public int MyValue {{ get; set; }}";
-            Assert.Equal(expected, result);
+            Assert.Equal(expected, result.ToString());
         }
 
         [Fact]
@@ -47,25 +46,22 @@ namespace XsdCodify.Lib.Test
         {
             //Given
             PropertyBuilder target = new PropertyBuilder();
-            AttributeFactory attributeFactory = new AttributeFactory();
+            AttributeBuilder attributeBuilder = new AttributeBuilder();
             
             //When
-            string result = target.Property("MyType", "MyProperty")
-                .Attribute(attributeFactory.Create(
-                    "SimpleAttribute"
-                ))
-                .Attribute(attributeFactory.Create(
-                    "CustomAttribute",
-                    new AttributeNamedStringConstantArgument("arg1", "val1"),
-                    new AttributeNamedStringConstantArgument("arg2", "val2")
-                ))
-                .Build();
+            IPropertyContext result = target.Create("MyType", "MyProperty")
+                .Attribute(attributeBuilder.Create("SimpleAttribute").Build())
+                .Attribute(attributeBuilder.Create("CustomAttribute")
+                    .NamedStringConstantArgument("arg1", "val1")
+                    .NamedStringConstantArgument("arg2", "val2")
+                    .Build()
+                ).Build();
             
             //Then
             string expected = $"[SimpleAttribute]" + Environment.NewLine +
                 $"[CustomAttribute(arg1=\"val1\", arg2=\"val2\")]" + Environment.NewLine +
                 $"public MyType MyProperty {{ get; set; }}";
-            Assert.Equal(expected, result);
+            Assert.Equal(expected, result.ToString());
         }
     }
 }

@@ -1,40 +1,39 @@
 using System;
-using System.Text;
+
+using XsdCodify.Lib.Generation.BuilderContexts;
 
 namespace XsdCodify.Lib.Generation
 {
     public class ClassBuilder
     {
-        private string className;
+        public ClassBuilder()
+        { }
 
         public ClassBuilderFluidSyntax Class(string className)
         {
-            this.className = className ?? throw new ArgumentNullException(nameof(className));
-            return new ClassBuilderFluidSyntax(this);
+            ClassContext context = new ClassContext(className);
+            return new ClassBuilderFluidSyntax(context);
         }
 
         public class ClassBuilderFluidSyntax
         {
-            private ClassBuilder owner;
+            private readonly ClassContext context;
 
-            public ClassBuilderFluidSyntax(ClassBuilder owner)
+            public ClassBuilderFluidSyntax(ClassContext context)
             {
-                this.owner = owner ?? throw new ArgumentNullException(nameof(owner));
+                this.context = context ?? throw new ArgumentNullException(nameof(context));
             }
 
-            public ClassBuilderFluidSyntax Property(string property)
+            public IClassContext Build()
             {
+                this.context.Verify();
+                return this.context;
+            }
+
+            public ClassBuilderFluidSyntax Property(IPropertyContext property)
+            {
+                this.context.AddProperty(property);
                 return this;
-            }
-
-            public string Build()
-            {
-                StringBuilder sb = new StringBuilder()
-                    .AppendLine($"public class {this.owner.className}")
-                    .AppendLine("{")
-                    .AppendLine()
-                    .AppendLine("}");
-                return sb.ToString().Trim();
             }
         }
     }

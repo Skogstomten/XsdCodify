@@ -1,7 +1,10 @@
 using System;
+
 using Xunit;
+
 using XsdCodify.Lib.Generation;
-using XsdCodify.Lib.Generation.Arguments;
+using XsdCodify.Lib.Generation.BuilderContexts;
+
 using XsdCodify.Lib.Test.TestUtilities;
 
 namespace XsdCodify.Lib.Test.Generation
@@ -15,13 +18,12 @@ namespace XsdCodify.Lib.Test.Generation
             ClassBuilder target = new ClassBuilder();
             
             //When
-            string result = target.Class("MyClass")
-                .Build();
+            IClassContext result = target.Class("MyClass").Build();
             
             //Then
             string expected = $"public class MyClass" + Environment.NewLine +
                 "{" + Environment.NewLine + Environment.NewLine + "}";
-            Assert.Equal(expected, result);
+            Assert.Equal(expected, result.ToString());
         }
 
         [Fact]
@@ -30,23 +32,22 @@ namespace XsdCodify.Lib.Test.Generation
             //Given
             ClassBuilder target = new ClassBuilder();
             PropertyBuilder propertyBuilder = new PropertyBuilder();
-            AttributeFactory attributeFactory = new AttributeFactory();
+            AttributeBuilder attributeFactory = new AttributeBuilder();
             
             //When
-            string result = target.Class("MyClass")
-                .Property(propertyBuilder.Property("string", "Prop1")
-                    .Build())
-                .Property(propertyBuilder.Property("MyType", "Prop2")
-                    .Attribute(attributeFactory.Create(
-                        "MyAttribute",
-                        new AttributeNamedStringConstantArgument("arg1", "value1")
-                    ))
+            IClassContext result = target.Class("MyClass")
+                .Property(propertyBuilder.Create("string", "Prop1").Build())
+                .Property(propertyBuilder.Create("MyType", "Prop2")
+                    .Attribute(attributeFactory
+                        .Create("MyAttribute")
+                        .NamedStringConstantArgument("arg1", "val1")
+                        .Build())
                     .Build())
                 .Build();
             
             //Then
             string expected = TemplateLoader.Load("CanMakeClassWithProperties");
-            Assert.Equal(expected, result);
+            Assert.Equal(expected, result.ToString());
         }
     }
 }

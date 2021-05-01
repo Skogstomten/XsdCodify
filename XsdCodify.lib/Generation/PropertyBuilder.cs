@@ -1,53 +1,45 @@
 using System;
-using System.Text;
-using System.Collections.Generic;
+
+using XsdCodify.Lib.Generation.BuilderContexts;
 
 namespace XsdCodify.Lib.Generation
 {
     public class PropertyBuilder
     {
-        private string typeName, propertyName;
-        private List<string> attributes = new List<string>();
+        public PropertyBuilder()
+        { }
 
-        public PropertyBuilderFluidSyntax Property(string typeName, string propertyName)
+        public PropertyBuilderFluidSyntax Create(string typeName, string propertyName)
         {
-            this.typeName = typeName ?? throw new ArgumentNullException(nameof(typeName));
-            this.propertyName = propertyName ?? throw new ArgumentNullException(nameof(ArgumentNullException));
-            return new PropertyBuilderFluidSyntax(this);
+            PropertyContext context = new PropertyContext(typeName, propertyName);
+            return new PropertyBuilderFluidSyntax(context);
         }
 
         public class PropertyBuilderFluidSyntax
         {
-            private PropertyBuilder owner;
-            
-            public PropertyBuilderFluidSyntax(PropertyBuilder owner)
+            private PropertyContext context;
+
+            public PropertyBuilderFluidSyntax(PropertyContext context)
             {
-                this.owner = owner ?? throw new ArgumentNullException(nameof(owner));
+                this.context = context ?? throw new ArgumentNullException(nameof(context));
             }
 
-            public PropertyBuilderFluidSyntax Attribute(string attribute)
+            public PropertyBuilderFluidSyntax Attribute(IAttributeContext attribute)
             {
-                if (string.IsNullOrWhiteSpace(attribute))
-                    throw new ArgumentNullException(nameof(attribute));
-
-                this.owner.attributes.Add(attribute);
+                if (attribute == null) throw new ArgumentNullException(nameof(attribute));
+                this.context.AddAttribute(attribute);
                 return this;
             }
 
-            public string Build()
+            public IPropertyContext Build()
             {
-                StringBuilder sb = new StringBuilder();
-                this.owner.attributes.ForEach(attribute => sb.AppendLine(attribute));
-                sb.AppendLine($"public {this.owner.typeName} {this.owner.propertyName} {{ get; set; }}");
-                return sb.ToString().Trim();
+                VerifyRequiredArguments();
+                return this.context;
             }
 
             private void VerifyRequiredArguments()
             {
-                if (string.IsNullOrWhiteSpace(this.owner.typeName))
-                    throw new InvalidOperationException($"Missing argument {nameof(this.owner.typeName)}");
-                if (string.IsNullOrWhiteSpace(this.owner.propertyName))
-                    throw new InvalidOperationException($"Missing argument {nameof(this.owner.propertyName)}");
+                this.context.Verify();
             }
         }
     }
